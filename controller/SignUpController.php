@@ -1,59 +1,56 @@
 <?php
 session_start();
-include_once('C:\xampp\htdocs\admin_nhahang\model\SignUpModel.php');
+include_once('C:\xampp\htdocs\admin_balo\model\SignUpModel.php');
+include_once('C:\xampp\htdocs\admin_balo\helper\mail.php');
+include_once('C:\xampp\htdocs\admin_balo\controller\CheckController.php');
 class SignUpController{
-    function dangkiTK($username, $password,$phone){
+    function dangkiTK($fullname,$address,$gender,$phone,$password,$email){
        $userModel = new SignUpModel();
-       $check=$this->selectUse($username);
-        if($check==false){
-           $result= $userModel->insertUser($username,$password,$phone,$status=0);
-            $_SESSION['success']='Đăng Kí Thành Công';          
-            if(isset($_SESSION['error'])){
-                unset($_SESSION['error']);
-            }           
-            header('location:layout.php');         
-          
-        }else{
-            $_SESSION['error']='Đăng Kí Không Thành Công';
-            // if(isset($_SESSION['error'])){
-            //     unset($_SESSION['error']);
-            // }  
-            header('location:register.php'); 
-        }
-    }
+             $checkMailHopLe=maill('aa',$email,'aa','aa');
+                            if($checkMailHopLe){
+                                $check=$userModel->selectUser($email);
+                                if($check==false){
+                                     try{
+                                        $result= $userModel->insertUser($fullname,$address,$gender,$phone,$password,$email); 
+                                        $_SESSION['name']=$email; 
+                                        header('location:manage-bill.php?status=0');    
+                                    }catch(Excetion $e){
+                                        echo $e;
+                                        return;
+                                 }     
+                               }else{
+                                 $_SESSION['errormail']='Email đã tồn tại';                            
+                                }
+                            }else{
+                                $_SESSION['errormail']='Email không có thực';     
+                            }
+                       }
+            
+    
 
-    function dangnhapTk($username,$password){
+    function dangnhapTk($email,$password){
         $userModel = new SignUpModel();
-        $result=$userModel->selectStatus($username);
-        $array=get_object_vars($result);
-        $_SESSION['status']=$array['status'];
-        if($array['status']==1||$array['status']==2){
-        $check=$userModel->selectLogin($username,$password);
+        $check=$userModel->selectLogin($email,$password);
         if($check==false){
             $_SESSION['error']='Sai username hoặc password';
-            header('location:login.php'); 
         }else{
-            $_SESSION['name']=$username;   
+            $_SESSION['nameAdmin']=$email;   
             if(isset($_SESSION['error'])){
                 unset($_SESSION['error']);
             }                  
-            header('location:layout.php'); 
+            header('location:manage-bill.php?status=0'); 
            
         }
-    }else{
-        $_SESSION['error']='Tài Khoản Không Được Phép Đăng Nhập';
-        header('location:login.php'); 
-    }
     }
 
-    function selectUse($username){
+    function selectUse($email){
         $userModel = new SignUpModel();
-        $check=$userModel->selectUser($username);
+        $check=$userModel->selectUser($email);
         return $check;
     }
 
     function dangXuatTk(){
-       unset($_SESSION['name']);
+       unset($_SESSION['nameAdmin']);
         header('location:views/login.php'); 
     }
 

@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\model\EditFoodModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\EditFoodModel.php');
     $model=new EditFoodModel;
     $types=$model->getType();
 ?>
@@ -17,8 +17,8 @@
     <meta name="keyword" content="FlatLab, Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
-    <title>Danh Sách Loại Món Ăn</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <title>Danh Sách Loại Sản Phẩm</title>
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -42,14 +42,14 @@
 <body>
     <section id="container">
         
-        <?php include_once('header.php')?>
-
-        <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
         include_once('menu.php');
-        endif?>
-        <!--sidebar end-->
+    ?>
 
         <!--main content start-->
         <section id="main-content">
@@ -58,15 +58,14 @@
         <section class="content">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <b>Danh sách loại</b>
+                    <b>Danh sách loại sản phẩm</b>
                 </div>
                 <div class="panel-body">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover" style="width:60%">
                         <thead>
                             <tr>
                                 <th>STT</th>
                                 <th>Tên loại</th>
-                                <th>Mô tả</th>
                                 <th>Tuỳ chọn</th>
                             </tr>
                         </thead>
@@ -74,13 +73,12 @@
                             <?php $stt = 1;?>
                            <?php foreach($types as $t):?>
                             <tr id="sanpham-<?= $t->id?>">
-                                <td><?= $stt++?></td>
-                                <td class="name-<?= $t->id?>"><?= $t->name?></td>
-                                <td><?=$t->description?></td>
+                                <td style="width:10%"><?= $stt++?></td>
+                                <td style="width:80%" class="name-<?= $t->id?>"><?= $t->name?></td>
                                 <td>
                                     <a style=" padding-bottom:10px" href="views/edit-type.php?id=<?= $t->id?>"><button class="btn btn-warning btn-sm" style="width:100%;">Sửa</button></a>
                                     <br><br>
-                                    <button class="btn btn-primary btn-sm btn-call-modal" data-id="<?= $t->id?>">Xóa</button>
+                                    <button class="btn btn-primary btn-sm btn-call-modal" data-id="<?= $t->id?>" style="width:100%">Xóa</button>
                                 </td>
                             </tr>
                             <?php endforeach?>

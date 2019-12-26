@@ -13,7 +13,7 @@
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
     <title>Trang Chủ</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -41,7 +41,7 @@
 
         <!--sidebar start-->
         <?php 
-        if(isset($_SESSION['name'])):
+        if(isset($_SESSION['nameAdmin'])):
         include_once('menu.php');
         endif?>
         <!--sidebar end-->

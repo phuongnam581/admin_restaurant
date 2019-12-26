@@ -1,42 +1,51 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\model\AddFoodModel.php');
-    include_once('C:\xampp\htdocs\admin_nhahang\model\EditFoodModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\AddFoodModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\EditFoodModel.php');
     $model = new AddFoodModel;
     $model1=new EditFoodModel;
     $types=$model1->getType();
+    $distributor=$model->getDistributor();
+    $url="location:http://localhost:8888/admin_balo/views/add-food.php";
     if(isset($_POST['submit'])){
-        $url=$_POST['url'];
-         $check=$model->insertUrl($url);
-        if($check==false){
-            $_SESSION['message']="Cập Nhật Link Thất Bại";
-        }
-        else{
-            $_SESSION['message']="Cập Nhật Link Thanh Công";
-        }
-        $result=$model->selectIdUrl($url);
-        $array = get_object_vars($result);
-        $id_url=($array['id']);
         $id_type=$_POST['type'];
-        $name=$_POST['name'];
-        $summary=$_POST['summary'];
-        $detail=$_POST['detail'];
-        $price=$_POST['price'];
-        $promotion_price=$_POST['promotion_price'];
-        $promotion=$_POST['promotion'];
-        $unit=$_POST['unit'];
-        if(isset($_POST['today'])){
-            $today=$_POST['today'];
-        }else{
-            $today=0;
-        }         
-        $image=$_POST['image']; 
-        $check1= $model->insertFood($id_type,$id_url,$name,$summary,$detail,$price,$promotion_price,$promotion,$image,$unit,$today);
-        
+        $product_code=trim($_POST['code']);
+        $name=trim($_POST['name']);
+        $detail=trim($_POST['detail']);
+        $value=$_POST['price'];
+        $img=trim($_POST['image']);
+        $id_distributor=$_POST['distributor'];
+        $quanlity_exist=$_POST['quanlity'];
+        $date=date('Y-m-d');
+        if(isset($name) === true && $name === ''){
+            // print_r('aab');
+            // die;
+            $_SESSION['loi']='Tên không hợp lệ';
+            header($url);
+            return;
+        }
+        elseif(isset($product_code) === true &&  $product_code === ''){
+            // print_r('aaa');
+            // die;
+            $_SESSION['loi']='Mã SP không hợp lệ';
+            header($url);
+            return;
+        }elseif(isset($detail) === true && $detail === ''){
+            $_SESSION['loi']='Mô tả không hợp lệ';
+            header($url);
+            return;
+        }elseif(isset($img) === true && $img === ''){
+            $_SESSION['loi']='Ảnh không hợp lệ';
+            header($url);
+            return;
+        }
+        strtoupper($product_code);
+        $check1= $model->insertProduct($id_type,$product_code,$name,$detail,$value,$img,$id_distributor,$quanlity_exist,$date);
         if($check1==false){
            $_SESSION['message']="Cập Nhật Thất Bại";
        }else{
             $_SESSION['message']="Cập Nhật Thành Công";
+            header("Refresh:0");
        }
     }
 ?>
@@ -53,8 +62,8 @@
     <meta name="keyword" content="FlatLab, Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
-    <title>Thêm Món Ăn</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <title>Thêm Sản Phẩm</title>
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -77,14 +86,17 @@
 </head>
 <body>
     <section id="container">
-        
-        <?php include_once('header.php')?>
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
+        include_once('menu.php');
+    ?>
 
         <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
-        include_once('menu.php');
-        endif?>
+       
         <!--sidebar end-->
 
         <!--main content start-->
@@ -104,12 +116,6 @@
                     <?php unset($_SESSION['message'])?>
                     <form action="" method="POST" class="form-horizontal" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label class="col-sm-2">Tên:</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" placeholder="Nhập tên món ăn" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
                             <label class="col-sm-2">Chọn loại:</label>
                             <div class="col-sm-10">
                                 <select name="type" class="form-control">
@@ -120,51 +126,33 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2">Nguyên liệu:</label>
+                            <label class="col-sm-2">Mã sản phẩm:</label>
                             <div class="col-sm-10">
-                                <textarea rows="5" class="form-control" name="summary" required></textarea>
+                                <input type="text"  class="form-control" name="code" required maxlength="8" minlength="4">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2">Tên sản phẩm:</label>
+                            <div class="col-sm-10">
+                            <input type="text"  class="form-control" name="name" required maxlength="20" minlength="4">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2">Mô tả:</label>
                             <div class="col-sm-10">
-                                <textarea name="detail" class="form-control" id="desc" required></textarea>
-                                <script>
-                                    CKEDITOR.replace('desc')
-                                </script>
+                                <textarea name="detail" class="form-control" id="desc" required maxlength="50" minlength="4"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2">Đơn giá:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="price" placeholder="Nhập giá món ăn" required>
+                                <input type="number" class="form-control" name="price" placeholder="Nhập giá sản phẩm" required max="10000" min="10">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2">Đơn giá khuyến mãi:</label>
+                            <label class="col-sm-2">Số Lượng Tồn:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="promotion_price" placeholder="Nhập giá khuyến mãi" value="0" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Khuyến mãi kèm theo:</label>
-                            <div class="col-sm-10">
-                                <select name="promotion" class="form-control">
-                                    <option value="khăn lạnh">Khăn lạnh</option>
-                                    <option value="nước ngọt">Nước ngọt</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Đơn vị tính:</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="unit" placeholder="Nhập đơn vị tính" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Trong ngày:</label>
-                            <div class="col-sm-10">
-                                <input type="checkbox" name="today" value='1' required>
+                                <input type="number" class="form-control" name="quanlity" placeholder="Nhập số lượng tồn" required max="200" min="1">
                             </div>
                         </div>
                         <div class="form-group">
@@ -174,9 +162,13 @@
                             </div>
                         </div>
                         <div class="form-group">
-                        <label class="col-sm-2">Url:</label>
+                            <label class="col-sm-2">Chọn Nhà Phân Phối:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="url" placeholder="Nhập đường dẫn món ăn" required>
+                                <select name="distributor" class="form-control">
+                                   <?php foreach($distributor as $d):?>
+                                    <option value="<?= $d->id?>"><?= $d->name?></option>
+                                    <?php endforeach?>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group">
@@ -186,7 +178,10 @@
                         </div>
 
                     </form>
-
+                    <?php if(isset($_SESSION['loi'])){
+		                                echo "<div style='color:red;' class='input-tb'>".$_SESSION['loi']."</div>";
+	                        }
+                    ?>	
                 </div>
             </div>
         </section>
@@ -208,7 +203,11 @@
         </footer>
         <!--footer end-->
     </section>
-
+    <?php
+    if(isset($_SESSION['loi'])){
+      unset($_SESSION['loi']);
+    }
+  ?>
     <!-- js placed at the end of the document so the pages load faster -->
     
     <script src="admin/js/bootstrap.min.js"></script>

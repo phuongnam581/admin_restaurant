@@ -1,6 +1,6 @@
 <?php
-    include_once('C:\xampp\htdocs\admin_nhahang\model\TypeModel.php');
-    include_once('C:\xampp\htdocs\admin_nhahang\controller\Controller.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\TypeModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\controller\Controller.php');
     class TypeController extends Controller{
         function getFoods(){
             $model = new TypeModel;

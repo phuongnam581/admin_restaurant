@@ -4,7 +4,7 @@ class BaseModel{
     public $db;
     function __construct(){
         try{
-            $this->db = new PDO('mysql:host=127.0.0.1:3310;dbname=nha_hang','root','');
+            $this->db = new PDO('mysql:host=127.0.0.1:3310;dbname=balo_shop','root','');
             $this->db->exec('SET NAMES UTF8');
         }
         catch(PDOException $e){

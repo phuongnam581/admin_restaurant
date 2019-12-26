@@ -1,17 +1,24 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\model\EditFoodModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\EditFoodModel.php');
     $model= new EditFoodModel;
     $id=$_GET['id'];
     $type=$model->getTypeById($id);
     if(isset($_POST['submit'])){
-        $name=$_POST['name'];
-        $description=$_POST['description'];
-        $check=$model->updateType($id,$name,$description);
+        $name=trim($_POST['name']);
+        if(isset($name) === true && $name === ''){
+            // print_r('aab');
+            // die;
+            $_SESSION['loiedittype']='Tên không hợp lệ';
+            header("Refresh:0");
+            return;
+        }
+        $check=$model->updateType($id,$name);
         if(!$check){
             $_SESSION['message']="Cập Nhật Thất Bại";
         }else{
             $_SESSION['message']="Cập Nhật Thành Công";
+            header("Refresh:0");
         }
     }
 ?>
@@ -29,7 +36,7 @@
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
     <title>Sửa Loại Sản Phẩm</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -53,13 +60,14 @@
 <body>
     <section id="container">
         
-        <?php include_once('header.php')?>
-
-        <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
         include_once('menu.php');
-        endif?>
+    ?>
         <!--sidebar end-->
 
         <!--main content start-->
@@ -69,7 +77,7 @@
         <section class="content">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <b>Sửa thông tin loại <span style="color:blue"><?= $type->name?></span></b>
+                    <b>Sửa thông tin loại sản phẩm<span style="color:blue"><?= $type->name?></span></b>
                 </div>
                 <div class="panel-body">
                    <?php if(isset($_SESSION['message'])):?>
@@ -80,16 +88,7 @@
                         <div class="form-group">
                             <label class="col-sm-2">Tên:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" placeholder="Nhập tên loại" required value="<?= $type->name?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Mô tả:</label>
-                            <div class="col-sm-10">
-                                <textarea name="description" class="form-control" id="desc" required><?=$type->description?></textarea>
-                                <script>
-                                    CKEDITOR.replace('desc')
-                                </script>
+                                <input type="text" class="form-control" name="name" placeholder="Nhập tên loại" required value="<?= $type->name?>" maxlength="8" minlength="4">
                             </div>
                         </div>
                         <div class="form-group">
@@ -98,6 +97,10 @@
                             </div>
                         </div>
                     </form>
+                    <?php if(isset($_SESSION['loiedittype'])){
+		                                echo "<div style='color:red;' class='input-tb'>".$_SESSION['loiedittype']."</div>";
+	                        }
+                    ?>	
                 </div>
             </div>
         </section>
@@ -164,7 +167,11 @@
         });
 
     </script>
-
+   <?php
+    if(isset($_SESSION['loiedittype'])){
+      unset($_SESSION['loiedittype']);
+    }
+  ?>
 </body>
 
 <!-- Mirrored from thevectorlab.net/flatlab/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 14 Aug 2015 03:43:32 GMT -->

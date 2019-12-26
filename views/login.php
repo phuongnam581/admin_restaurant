@@ -1,13 +1,14 @@
 <?php
-    include_once('C:\xampp\htdocs\admin_nhahang\controller\SignUpController.php');
+    include_once('C:\xampp\htdocs\admin_balo\controller\SignUpController.php');
     $userController = new SignUpController();
-    if(isset($_POST['login'])){
-        $username=$_POST['inputUsername'];
-        $password=$_POST['inputPassword'];
-        $check=$userController->dangnhapTk($username,$password);
+    if(isset($_POST['error'])){
+      unset($_SESSION['error']);
     }
-
-     
+    if(isset($_POST['login'])){
+        $email=$_POST['inputEmail'];
+        $password=$_POST['inputPassword'];
+        $check=$userController->dangnhapTk($email,$password);
+    }
   ?>
 
 <!DOCTYPE html>
@@ -23,7 +24,7 @@
     <link rel="shortcut icon" href="img/favicon.html">
 
     <title>Đăng Nhập</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -46,10 +47,7 @@
 </head>
 
   <body>
-  <?php if(isset($_SESSION['error'])):
-		echo "<div class='alert alert-danger'>".$_SESSION['error']."</div>";
-	?>	
-	<?php endif?>
+  
 	
   
     <div class="container">
@@ -59,7 +57,7 @@
             <p id="profile-name" class="profile-name-card"></p>
             <form class="form-signin" method="post" action="">
                 <span id="reauth-email" class="reauth-email"></span>
-                <input type="username" name="inputUsername" class="form-control" placeholder="Username" required autofocus>
+                <input type="email" name="inputEmail" class="form-control" placeholder="Email" required autofocus>
                 <input type="password" name="inputPassword" class="form-control" placeholder="Password" required>
                 
                 <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit" name="login">Sign in</button>
@@ -67,6 +65,11 @@
             <a href="views/register.php" class="forgot-password">
                Đăng Kí
             </a>
+            <?php if(isset($_SESSION['error'])){
+                echo "<div class='text-danger' size='3'>".$_SESSION['error']."</div>";
+            }
+            unset($_SESSION['error']);
+	          ?>	
         </div><!-- /card-container -->
     </div><!-- /container -->
     <!-- js placed at the end of the document so the pages load faster -->

@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\controller\MenuController.php');
+    include_once('C:\xampp\htdocs\admin_balo\controller\MenuController.php');
     $c= new MenuController;
     $result = $c->getType();
 ?>
@@ -20,42 +20,12 @@
                     <span>Quản Lí Đơn Hàng</span>
                 </a>
                 <ul class="sub">
-                    <?php if($_SESSION['status']==1):?>
-                    <li><a  href="views/manage-bill.php?status=0">DS Đơn Hàng Chưa Xác Nhận</a></li>
-                    <li><a  href="views/manage-bill.php?status=1">DS Đơn Hàng Đã Xác Nhận</a></li>
-                    <li><a  href="views/manage-bill.php?status=3">DS Đơn Hàng Bị Hủy</a></li>
-                    <?php endif?> 
-                    <?php if($_SESSION['status']==2):?>
+                    <li><a  href="views/manage-bill.php?status=0">DS Đơn Hàng Chưa Duyệt</a></li>
+                    <li><a  href="views/manage-bill.php?status=1">DS Đơn Hàng Đang Giao</a></li>
                     <li><a  href="views/manage-bill.php?status=2">DS Đơn Hàng Hoàn Tất</a></li>
-                    <?php endif?>           
+                    <li><a  href="views/manage-bill.php?status=3">DS Đơn Hàng Bị Hủy</a></li>    
                 </ul>
             </li>
-            <?php if($_SESSION['status']==2):?>
-            <li class="sub-menu">
-                <a href="javascript:;" >
-                    <i class=" fa fa-envelope"></i>
-                    <span>Quản Lí Người Dùng</span>
-                </a>
-                <ul class="sub">
-                    <li><a  href="views/delete-user.php?status=0">Khách Hàng</a></li>
-                    <li><a  href="views/delete-user.php?status=1">Nhân Viên Bán Hàng</a></li>
-                    <li><a  href="views/delete-user.php?status=2">Quản Trị Hệ Thống</a></li>
-                </ul>
-            </li>    
-            <li>
-                <a href="views/add-user.php" >
-                    <i class="fa fa-plus"></i>
-                    <span>Thêm người dùng</span>
-                </a>
-            </li>
-            <li>
-                <a href="views/list-comment.php" >
-                    <i class="fa fa-plus"></i>
-                    <span>Trả Lời Bình Luận</span>
-                </a>
-            </li>
-            <?php endif?>
-            <?php if($_SESSION['status']==1):?>
             <li>
                 <a href="views/add-type.php" >
                     <i class="fa fa-plus"></i>
@@ -63,17 +33,17 @@
                 </a>
             </li>
             <li>
+                <a href="views/list-type.php" >
+                    <i class="fa fa-bars"></i>
+                    <span>Danh sách loại SP</span>
+                </a>
+            </li>       
+            <li>
                 <a href="views/add-food.php" >
                     <i class="fa fa-plus"></i>
                     <span>Thêm sản phẩm</span>
                 </a>
             </li>
-            <li>
-                <a href="views/list-type.php" >
-                    <i class="fa fa-bars"></i>
-                    <span>Danh sách loại SP</span>
-                </a>
-            </li>        
             <li class="sub-menu">
                 <a href="javascript:;" >
                     <i class="fa fa-bars"></i>
@@ -85,7 +55,12 @@
                     <?php endforeach?>
                 </ul>
             </li>
-            <?php endif?>
+            <li>
+                <a href="views/statistical.php" >
+                    <i class="fa fa-plus"></i>
+                    <span>Thống Kê</span>
+                </a>
+            </li>
         </ul>
         <!-- sidebar menu end-->
     </div>

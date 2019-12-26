@@ -223,8 +223,8 @@
                     <li class="dropdown">
                         <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                             <img alt="" src="admin/img/avatar1_small.jpg">
-                            <span class="username"><?php if(isset($_SESSION['name'])){
-                                echo $_SESSION['name'];}?>
+                            <span class="username"><?php if(isset($_SESSION['nameAdmin'])){
+                                echo $_SESSION['nameAdmin'];}?>
                                 
                             </span>
                             <b class="caret"></b>

@@ -1,10 +1,10 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\controller\TypeController.php');
-    include_once('C:\xampp\htdocs\admin_nhahang\model\TypeModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\controller\TypeController.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\TypeModel.php');
     $model = new TypeModel;
     $id=$_GET['type'];
-    $data=$model->getFoodsByType($id);
+    $data=$model->getProductsByType($id);
     
 ?>
 <!DOCTYPE html>
@@ -21,7 +21,7 @@
     <link rel="shortcut icon" href="img/favicon.html">
 
     <title>Danh Sách Sản Phẩm</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -45,13 +45,14 @@
 <body>
     <section id="container">
         
-        <?php include_once('header.php')?>
-
-        <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
         include_once('menu.php');
-        endif?>
+    ?>
         <!--sidebar end-->
 
         <!--main content start-->
@@ -67,29 +68,32 @@
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>STT</th>
-                                <th>Tên loại</th>
+                                <th>Mã hàng</th>
+                                <th>Tên</th>
                                 <th>Mô tả</th>
-                                <th>Hình</th>
+                                <th>Giá</th>
+                                <th>Số Lượng Tồn</th>
+                                <th>Trạng Thái (mới)</th>
                                 <th>Tuỳ chọn</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php 
-                                $stt = 1;
                                 foreach($data as $t):
                             ?>                          
-                            <tr id="sanpham-<?= $t->id?>">
-                                <td><?php echo $stt++?></td>
-                                <td class="name-<?= $t->id?>"><?= $t->name?></td>
+                            <tr id="sanpham-<?= $t->product_code?>">
+                                <td><?= $t->product_code?></td>
+                                <td class="name-<?= $t->product_code?>"><?= $t->name?></td>
                                 <td><?=$t->detail?></td>
+                                <td><?=number_format($t->value)?></td>
+                                <td><?=$t->quanlity_exist?></td>
                                 <td>
-                                    <img src="admin/img/hinh_mon_an/<?= $t->image?>" style="height:80px">
+                                <input type="checkbox" name="" value="" disabled="disabled" <?php if($t->new ==1){?>checked<?php }?>>
                                 </td>
                                 <td>
-                                    <a style=" padding-bottom:10px" href="views/edit-products.php?id=<?= $t->id?>"><button class="btn btn-warning btn-sm" style="width:100%;">Sửa</button></a>
+                                    <a style=" padding-bottom:10px" href="views/edit-products.php?id=<?= $t->product_code?>"><button class="btn btn-warning btn-sm" style="width:100%;">Sửa</button></a>
                                     <br><br>
-                                    <button class="btn btn-primary btn-sm btn-call-modal" data-id="<?= $t->id?>">Xóa</button>
+                                    <button class="btn btn-primary btn-sm btn-call-modal" data-id="<?= $t->product_code?>">Xóa</button>
                                 </td>
                             </tr>
                             <?php endforeach?>
@@ -204,16 +208,17 @@
                     success:function(data){
                         var mess = "";
                         $('#myModal').modal('hide')
-                        if($.trim(data)=='existfood'){
-                            mess = "Không thể xoá, tồn tại món ăn"
+                        if($.trim(data)=='error'){
+                            mess = "Không thể xoá"
                         }
                         else if($.trim(data)=='success'){
                             mess = "Xoá thành công";
-                            $('#sanpham-'+id).hide()
+                            location.reload();
                         }
                         else mess = "Thất bại, vui lòng thử lại"
                         $('.your-mess').html(mess)
-                        $('#Message').modal('show')  
+                        $('#Message').modal('show') 
+                         
                     }  
                 })
             }

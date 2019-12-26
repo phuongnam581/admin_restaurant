@@ -1,15 +1,23 @@
 <?php
     session_start();
-     include_once('C:\xampp\htdocs\admin_nhahang\model\AddFoodModel.php');
+     include_once('C:\xampp\htdocs\admin_balo\model\AddFoodModel.php');
      $model = new AddFoodModel;
      if(isset($_POST['submit'])){
-         $name = $_POST['name'];
-         $description = $_POST['description'];
-         $check = $model->insertType($name,$description);
+         $name = trim($_POST['name']);
+         if(isset($name) === true && $name === ''){
+            // print_r('aab');
+            // die;
+            $_SESSION['loiaddtype']='Tên không hợp lệ';
+            header("Refresh:0");
+            return;
+        }
+         $check = $model->insertType($name);
          if(!$check){
              $_SESSION['message'] ="Thêm Thất Bại";
          }else{
             $_SESSION['message'] ="Thêm Thành Công";
+           // unset($_SESSION['message']);
+            header("Refresh:0");
          }
      }
 ?>
@@ -27,7 +35,7 @@
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
     <title>Thêm Loại Sản Phẩm</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -51,13 +59,17 @@
 <body>
     <section id="container">
         
-        <?php include_once('header.php')?>
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
+        include_once('menu.php');
+    ?>
 
         <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
-        include_once('menu.php');
-        endif?>
+       
         <!--sidebar end-->
 
         <!--main content start-->
@@ -77,16 +89,7 @@
                         <div class="form-group">
                             <label class="col-sm-2">Tên:</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" placeholder="Nhập tên loại" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Mô tả:</label>
-                            <div class="col-sm-10">
-                                <textarea name="description" class="form-control" id="desc" required></textarea>
-                                <script>
-                                    CKEDITOR.replace('desc')
-                                </script>
+                                <input type="text" class="form-control" name="name" placeholder="Nhập tên loại" required max="10" min="4">
                             </div>
                         </div>
                         <div class="form-group">
@@ -96,7 +99,10 @@
                         </div>
 
                     </form>
-
+                    <?php if(isset($_SESSION['loiaddtype'])){
+		                                echo "<div style='color:red;' class='input-tb'>".$_SESSION['loiaddtype']."</div>";
+	                        }
+                    ?>	
                 </div>
             </div>
         </section>
@@ -117,7 +123,11 @@
         </footer>
         <!--footer end-->
     </section>
-
+    <?php
+    if(isset($_SESSION['loiaddtype'])){
+      unset($_SESSION['loiaddtype']);
+    }
+  ?>
     <!-- js placed at the end of the document so the pages load faster -->
     
     <script src="admin/js/bootstrap.min.js"></script>

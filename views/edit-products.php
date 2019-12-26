@@ -1,33 +1,50 @@
+
 <?php
-    session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\model\EditFoodModel.php');
-    $model=new EditFoodModel;
-    $id=$_GET['id'];
-    $food=$model->getFoodsById($id);
-    $types=$model->getType();
-    if(isset($_POST['submit'])){
-        $id_type=$_POST['type'];
-        $name=$_POST['name'];
-        $summary=$_POST['summary'];
-        $detail=$_POST['detail'];
-        $price=$_POST['price'];
-        $promotion_price=$_POST['promotion_price'];
-        $promotion=$_POST['promotion'];
-        $unit=$_POST['unit'];
-        if(isset($_POST['today'])){
-            $today=$_POST['today'];
-        }else{
-            $today=0;
-        }         
-        $image=$_POST['image']; 
-        $check= $model->updateFood($id,$id_type,$name,$summary,$detail,$price,$promotion_price,$promotion,$image,$unit,$today);
-        
-        if($check==false){
-           $_SESSION['message']="Cập Nhật Thất Bại";
-       }else{
-            $_SESSION['message']="Cập Nhật Thành Công";
-       }
+session_start();
+include_once 'C:\xampp\htdocs\admin_balo\model\EditFoodModel.php';
+$model = new EditFoodModel;
+$product_code = $_GET['id'];
+$food = $model->getProductsById($product_code);
+$types = $model->getType();
+if (isset($_POST['submit'])) {
+    $id_categoires = $_POST['type'];
+    $name = trim($_POST['name']);
+    $detail = trim($_POST['detail']);
+    $price = trim($_POST['price']);
+    $image = trim($_POST['image']);
+    $quantityExist = $_POST['quanti'];
+    $new = $_POST['new'];
+    $date = date("Y-m-d");
+    if(isset($name) === true && $name === ''){
+        // print_r('aab');
+        // die;
+        $_SESSION['loiedit']='Tên không hợp lệ';
+        header("Refresh:0");
+        return;
     }
+    elseif(isset($product_code) === true &&  $product_code === ''){
+        // print_r('aaa');
+        // die;
+        $_SESSION['loiedit']='Mã SP không hợp lệ';
+        header("Refresh:0");
+        return;
+    }elseif(isset($detail) === true && $detail === ''){
+        $_SESSION['loiedit']='Mô tả không hợp lệ';
+        header("Refresh:0");
+        return;
+    }elseif(isset($image) === true && $image === ''){
+        $_SESSION['loiedit']='Ảnh không hợp lệ';
+        header("Refresh:0");
+        return;
+    }
+    strtoupper($product_code);
+        $check = $model->updateProduct($product_code, $id_categoires, $name, $detail, $price, $image, $new, $quantityExist, $date);
+        if ($check == false) {
+            $_SESSION['message'] = "Cập Nhật Thất Bại";
+        } else {
+            header("Refresh:0");
+        }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,8 +59,8 @@
     <meta name="keyword" content="FlatLab, Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
     <link rel="shortcut icon" href="img/favicon.ht  ml">
 
-    <title>Sửa Món Ăn</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <title>Sửa Sản Phẩm</title>
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -66,14 +83,15 @@
 </head>
 <body>
     <section id="container">
-        
-        <?php include_once('header.php')?>
 
-        <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
         include_once('menu.php');
-        endif?>
+    ?>
         <!--sidebar end-->
 
         <!--main content start-->
@@ -83,100 +101,112 @@
         <section class="content">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <b>Cập nhật món ăn <span style="color:blue"><?= $food->name?></span></b>
+                    <b>Cập nhật sản phẩm <span style="color:blue"><?=$food->name?></span></b>
                 </div>
                 <div class="panel-body">
-                    <?php if(isset($_SESSION['message'])):?>
-                    <div class="alert alert-danger"><?php echo $_SESSION['message']?></div>
+                    <?php if (isset($_SESSION['message'])): ?>
+                    <div class="alert alert-danger"><?php echo $_SESSION['message'] ?></div>
                     <?php endif?>
                     <?php unset($_SESSION['message'])?>
                     <form action="" method="POST" class="form-horizontal" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label class="col-sm-2">Tên:</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="name" placeholder="Nhập tên món ăn" value="<?= $food->name?>" required>
-                            </div>
-                        </div>
+
                         <div class="form-group">
                             <label class="col-sm-2">Chọn loại:</label>
                             <div class="col-sm-10">
-                                <select name="type" class="form-control">
-                                    <?php foreach($types as $t):?>
-                                    <option value="<?= $t->id?>" <?php if($food->id_type==$t->id):?> selected <?php endif?>><?= $t->name?></option>
+                                <select name="type" class="form-control" id="cate" style="">
+                                    <?php foreach ($types as $t): ?>
+                                    <option value="<?=$t->id?>" <?php if ($food->id_categories == $t->id): ?> selected <?php endif?>><?=$t->name?></option>
                                     <?php endforeach?>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2">Nguyên liệu:</label>
+                            <label class="col-sm-2">Tên:</label>
                             <div class="col-sm-10">
-                                <textarea rows="5" class="form-control" name="summary" required><?= $food->summary?></textarea>
+                                <input type="text" id="ten" class="form-control" name="name" placeholder="Nhập tên sản phẩm" value="<?=$food->name?>" required maxlength="40" minlength="4" style="">
+                                <?php if (isset($_SESSION['message_ten'])): ?>
+                                    <div style="color:red"><?php echo $_SESSION['message_ten'] ?></div>
+                                <?php endif?>
+                            </div>
+                            <div>
+                                <span id="tb-ten" style="color:red"></span>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2">Mô tả:</label>
                             <div class="col-sm-10">
-                                <textarea name="detail" class="form-control" id="desc" required><?=$food->detail?></textarea>
-                                <script>
-                                    CKEDITOR.replace('desc')
-                                </script>
+                                <textarea name="detail" id="mota" class="form-control" id="desc" required rows="5" maxlength="50" minlength="4" style="margin-top:10px;"><?=$food->detail?></textarea>
+                                <?php if (isset($_SESSION['message_mota'])): ?>
+                                    <div style="color:red"><?php echo $_SESSION['message_ten'] ?></div>
+                                <?php endif?>
+                            <div>
+                                <span id="tb-mota" style="color:red"></span>
+                            </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2">Đơn giá:</label>
                             <div class="col-sm-10">
-                                <input type="text" value="<?= $food->price?>" class="form-control" name="price" placeholder="Nhập giá món ăn" required>
+                                <input type="number" id="gia" value="<?=number_format($food->value)?>" class="form-control" name="price" placeholder="Nhập giá tiền sản phẩm" required max="10000" minlength="10">
+                            </div>
+                            <div>
+                                <span id="tb-gia" style="color:red"></span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2">Đơn giá khuyến mãi:</label>
+                            <label class="col-sm-2">Tình Trạng Sản Phẩm:</label>
                             <div class="col-sm-10">
-                                <input type="text" value="<?= $food->promotion_price?>" class="form-control" name="promotion_price" placeholder="Nhập giá khuyến mãi" value="0" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Khuyến mãi kèm theo:</label>
-                            <div class="col-sm-10">
-                                <select name="promotion" class="form-control">
-                                    <option value="khăn lạnh">Khăn lạnh</option>
-                                    <option value="nước ngọt">Nước ngọt</option>
+                                <select id="moi" name="new" class="form-control">
+                                    <option value="0" <?php if ($food->new == 0): ?> selected <?php endif?>>Cũ</option>
+                                    <option value="1" <?php if ($food->new == 1): ?> selected <?php endif?>>Mới</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2">Đơn vị tính:</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" name="unit" placeholder="Nhập đơn vị tính" value="<?= $food->unit?>" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2">Trong ngày:</label>
-                            <div class="col-sm-10">
-                                <input type="checkbox" name="today" value='1'  <?php if($food->today==1):?> checked <?php endif?> >
-                            </div>
-                        </div>
-                        <div class="form-group">
                             <label class="col-sm-2">Hình Ảnh:</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control" name="image" placeholder="Nhập tên ảnh" value="<?= $food->image?>" required>
-                                </div>
+                            <div class="col-sm-10">
+                                <input type="text" id="hinhanh" class="form-control" name="image" placeholder="Nhập tên ảnh" value="<?=$food->image?>" required maxlength="8" minlength="3">
+                                <?php if (isset($_SESSION['message_hinhanh'])): ?>
+                                    <div style="color:red"><?php echo $_SESSION['message_ten'] ?></div>
+                                <?php endif?>
+                            </div>
+                            <div>
+                                <span id="tb-hinhanh" style="color:red"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2">Số Lượng Tồn:</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="soluongton" class="form-control" name="quanti" placeholder="Nhập số lượng tồn" value="<?=$food->quanlity_exist?>" required maxlength="200" minlength="1">
+                            </div>
+                            <div>
+                                <span id="tb-soluongton" style="color:red"></span>
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-sm-10 col-sm-offset-2">
-                                <button type="submit" class="btn btn-primary" name="submit">Update</button>
+                                <button type="submit" id="btnCapNhat" class="btn btn-primary" name="submit">Update</button>
                             </div>
                         </div>
 
                     </form>
-
+                    <?php if(isset($_SESSION['loiedit'])){
+		                                echo "<div style='color:red;' class='input-tb'>".$_SESSION['loiedit']."</div>";
+	                        }
+                    ?>	
                 </div>
             </div>
         </section>
     </div>
 </section>
-      
+
 
         </section>
+          <?php
+    if(isset($_SESSION['loiedit'])){
+      unset($_SESSION['loiedit']);
+    }
+  ?>
         <!--main content end-->
         <!--footer start-->
         <footer class="site-footer">
@@ -189,9 +219,7 @@
         </footer>
         <!--footer end-->
     </section>
-
     <!-- js placed at the end of the document so the pages load faster -->
-    
     <script src="admin/js/bootstrap.min.js"></script>
     <script class="include" type="text/javascript" src="admin/js/jquery.dcjqaccordion.2.7.js"></script>
     <script src="admin/js/jquery.scrollTo.min.js"></script>
@@ -236,6 +264,7 @@
 
     </script>
 
+  
 </body>
 
 <!-- Mirrored from thevectorlab.net/flatlab/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 14 Aug 2015 03:43:32 GMT -->

@@ -1,16 +1,17 @@
 <?php
     session_start();
-    include_once('C:\xampp\htdocs\admin_nhahang\model\BillModel.php');
-    include_once('C:\xampp\htdocs\admin_nhahang\model\EditFoodModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\BillModel.php');
     $status=$_GET['status'];
     $model= new BillModel;
-    $model1= new EditFoodModel;
-    $bills=$model->getBill($status);
-    $result=$model->countBill($status);
+    $order=$model->getOrder($status);
+    $result=$model->countOrder($status);
     $array = get_object_vars($result);
     $count=$array["COUNT(id)"];
-
-   
+    $shiper=$model->getShipper();
+    $result1=$model->getIdEmploy($_SESSION['nameAdmin']);
+    $array1 = get_object_vars($result1);
+    $idEmploy=$array1["id"];
+    $idName=$array1["fullname"];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +27,7 @@
     <link rel="shortcut icon" href="img/favicon.html">
 
     <title>Quản Lí Hóa Đơn</title>
-    <base href="http://localhost:8888/admin_nhahang/">
+    <base href="http://localhost:8888/admin_balo/">
 
     <!-- Bootstrap core CSS -->
     <link href="admin/css/bootstrap.min.css" rel="stylesheet">
@@ -50,16 +51,14 @@
 <body>
     <section id="container">
         
-        <?php include_once('header.php')?>
-
-        <!--sidebar start-->
-        <?php 
-        if(isset($_SESSION['name'])):
+    <?php 
+        if(!isset($_SESSION['nameAdmin'])){
+            header("Location: http://localhost:8888/admin_balo/views/login.php");
+            die();
+        }
+        include_once('header.php');
         include_once('menu.php');
-        endif?>
-        <!--sidebar end-->
-
-        <!--main content start-->
+    ?>
        
         <section id="main-content">
     <section class="wrapper">
@@ -70,13 +69,13 @@
                     <b>
                     Danh sách ĐH 
                    <?php if($status==0){?>
-                    chưa xác nhận
+                    chưa duyệt
                    <?php }elseif($status==1){?>
-                    đã xác nhận
+                    đang giao
                    <?php }elseif($status==2){?>
                     hoàn tất
-                   <?php }else{?>
-                    bị huỷ
+                   <?php }elseif($status==3){?>
+                    hủy
                    <?php }?>
                     </b>
                 </div>
@@ -90,46 +89,58 @@
                             <th>Địa chỉ giao hàng</th>
                             <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
-                            <th>Ghi chú</th>
+                            <?php if($status==0):?>
+                            <th>Nhân Viên Giao</th>
+                            <?php endif?>
                             <?php if($status==0||$status==1):?>
                             <th>Tuỳ chọn</th>
                            <?php endif?>
                         </thead>
                         <tbody>
-                          <?php foreach($bills as $bill):?>
-                            <tr id="bill-<?= $bill->id?>}">
-                            <?php $idBill= $bill->id;
-                                  $food=$model->getFoods($status,$idBill);
+                         <span style="display:none;" id="id_employ"><?= $idEmploy?></span>
+                         <span style="display:none;" id="id_name"><?= $idName?></span>
+                         
+                          <?php foreach($order as $o):?>
+                            <tr id="Order-<?= $o->id?>}">
+                            <?php $idOrder= $o->id;
+                                  $food=$model->getProductDetail($status,$idOrder);
                             ?>
-                                <td>HD-<?= $bill->id?></td>
-                                <td><?= date('d-m-Y H:i:s',strtotime($bill->date_order))?></td>
+                                <td>HD-<?= $o->id?></td>
+                                <td><?= date('d-m-Y',strtotime($o->created_at))?></td>
                                 <td>
-                                    <p><?= $bill->name?></p>
-                                    <p><?= $bill->phone?></p>
-                                   
+                                    <p><?= $o->username?></p>
                                 </td>
-                                <td><p><?= $bill->address?></p></td>   
+                                <td><p><?= $o->address?></p></td>   
                                 <td>
                                    <?php foreach($food as $f):?>
                                     <div>
                                         <p><?= $f->name?></p>
-                                        <hr>
+                                        <br>
                                     </div>
                                     <?php endforeach?>
                                 </td>
-                                <td> <p><?= $bill->total?></p></td>
-
-                                <td> <p><?= $bill->note?></p></td>
-                               <?php if($status==0||$status==1):?>
-                                <td>
-                                <button onclick="myFunction() style="width:100%" class="btn btn-sm btn-danger btn-cancel" data-id="<?= $bill->id?>" data-status="">Huỷ đơn hàng</button>
-
-                                    <br>
-                                   <?php if($status==1):?>
-                                    <button style="width:100%" class="btn btn-sm btn-success" data-id="<?= $bill->id?>" data-status="">Hoàn tất</button>
-                                   <?php endif?>
+                                <td> <p><?=number_format($o->total)?></p></td>
+                                <?php if($status==0):?>
+                                <td>    
+                                    <select style="height: 28px" id="categoryEmploy">
+                                    <?php foreach($shiper as $s):?>
+							            <option value="<?=$s->id?>" id="<?=$s->id?>"><?=$s->fullname?> (<?=$s->count?>)</option>
+                                    <?php endforeach?>
+						            </select>
                                 </td>
-                               <?php endif?>
+                                <?php endif?>
+                               <?php if($status==0){?>
+                                <td>
+                                <button style="width:100%" id="btnDuyet" class="btn btn-sm btn-success btnDuyet" data-id="<?= $o->id?>" data-status="<?= $o->status?>" data-cus="<?= $o->id_customer?>">Duyệt</button>
+                                </td>
+                                <td>
+                                <button style="width:100%" id="btnHuy" class="btn btn-sm btn-danger btnHuy" data-id="<?= $o->id?>"  data-cus="<?= $o->id_customer?>" data-status="3">Hủy</button>
+                                </td>
+                               <?php }else if($status==1){?>
+                                <td>
+                                <button style="width:100%" id="btnHoanTat" class="btn btn-sm btn-success btnHoanTat" data-id="<?= $o->id?>" data-status="<?= $o->status?>" data-cus="<?= $o->id_customer?>">Hoàn Tất</button>
+                                </td>
+                               <?php }?>
                             </tr>
                             <?php endforeach?>
                         </tbody>
@@ -154,26 +165,7 @@
                 </h4>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Huỷ</button>
-                <button type="button" class="btn btn-primary" id="btn-continue" data-id="null">Tiếp tục</button>
-            </div>
-        </div>
-    </div>
-</div>
-      
-<div class="modal fade" id="myModal1" role="dialog">
-    <div class="modal-dialog">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title1">
-                    
-                </h4>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Huỷ</button>
-                <button type="button" class="btn btn-primary" id="btn-go" data-id="null">Tiếp tục</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCancel">Close</button>
             </div>
         </div>
     </div>
@@ -217,9 +209,7 @@
     <script src="admin/js/count.js"></script>
 
     <script>
-
-        //owl carousel
-
+        
         $(document).ready(function () {
             $("#owl-demo").owlCarousel({
                 navigation: true,
@@ -229,75 +219,121 @@
                 autoPlay: true
 
             });
-            $('.btn-cancel').click(function(){
-        var idBill = $(this).attr('data-id')
-        $('.modal-title').text('ĐH HD-'+idBill+' sẽ chuyển sang trạng thái huỷ!')
-        $('#myModal').modal('show')
-        $('#btn-continue').attr('data-id',idBill)
-    })
-    $('.btn-success').click(function(){
-        var idBill = $(this).attr('data-id')
-        $('.modal-title1').text('ĐH HD-'+idBill+' sẽ chuyển sang trạng thái hoàn tất!')
-        $('#myModal1').modal('show')
-        $('#btn-go').attr('data-id',idBill)
-    })
-    $('#btn-continue').click(function(){
-        var idBill = $(this).attr('data-id')
+           
+     
+    $('.btnDuyet').click(function(){
+        var idOrder = $(this).attr('data-id');
+        var idStatus= $(this).attr('data-status');
+        var idCus=$(this).attr('data-cus');
+        var idEmploy= $('#id_employ').text();   
+        var idName= $('#id_name').text();
+        var idShiper=$('#categoryEmploy').val();
         $.ajax({
-            url:"editbill.php",
+            url:"/admin_balo/editbill.php",
             type:'POST',
             data:{
-                id_bill:idBill,
-                status:3
+                idOrder:idOrder,
+                idStatus:idStatus,
+                idEmploy:idEmploy,
+                idShiper:idShiper,
+                idName:idName,
+                idCus:idCus
             },
             success:function(res){
-                // console.log(res)
-                if($.trim(res)=='ok'){
-                    $('#bill-'+idBill).remove()
-                    $('#myModal').modal('hide')
-                    alert('Cập nhật thành công')
+                 console.log(res)
+                if($.trim(res)=='Cập Nhật Thất Bại'){
+                    $('.modal-title').text('Cập Nhật Thất Bại');
+                    $('#myModal').modal('show');
                 }
-                else 
-                    alert('Vui lòng thử lại')
+                else if($.trim(res)=='Gửi Email Thất Bại'){
+                    $('.modal-title').text('Gửi Email Thất Bại');
+                    $('#myModal').modal('show');
+                }else if($.trim(res)=='ok'){
+                    $('.modal-title').text('ĐH HD-'+idOrder+'đã được chuyển qua trạng thái giao!');
+                    $('#myModal').modal('show');
+                    
+                }
             },
-            error:function(){
-                console.log('errr')
+            error:function(err){
+                console.log(err);
+            }
+        })
+      
+    })
+    $('.btnHoanTat').click(function(){
+        var idOrder = $(this).attr('data-id');
+        var idStatus= $(this).attr('data-status');
+        var idCus=$(this).attr('data-cus');
+        var idName= $('#id_name').text();
+        $.ajax({
+            url:"/admin_balo/editbill.php",
+            type:'POST',
+            data:{
+                idOrder:idOrder,
+                idStatus:idStatus,
+                idName:idName,
+                idCus:idCus
+            },
+            success:function(res){
+                 console.log(res)
+                if($.trim(res)=='Cập Nhật Thất Bại'){
+                    $('.modal-title').text('Cập Nhật Thất Bại');
+                    $('#myModal').modal('show');
+                }
+                else if($.trim(res)=='Gửi Email Thất Bại'){
+                    $('.modal-title').text('Gửi Email Thất Bại');
+                    $('#myModal').modal('show');
+                }else if($.trim(res)=='ok'){
+                    $('.modal-title').text('ĐH HD-'+idOrder+'đã được chuyển qua trạng thái hoàn tất!');
+                    $('#myModal').modal('show');
+                    
+                }
+            },
+            error:function(err){
+                console.log(err);
+            }
+        })
+      
+    })
+    $('.btnHuy').click(function(){
+        var idOrder = $(this).attr('data-id');
+        var idStatus= $(this).attr('data-status');
+        var idCus=$(this).attr('data-cus');
+        var idName= $('#id_name').text();
+        $.ajax({
+            url:"/admin_balo/editbill.php",
+            type:'POST',
+            data:{
+                idOrder:idOrder,
+                idStatus:idStatus,
+                idName:idName,
+                idCus:idCus
+            },
+            success:function(res){
+                 console.log(res)
+                if($.trim(res)=='Cập Nhật Thất Bại'){
+                    $('.modal-title').text('Cập Nhật Thất Bại');
+                    $('#myModal').modal('show');
+                }
+                else if($.trim(res)=='Gửi Email Thất Bại'){
+                    $('.modal-title').text('Gửi Email Thất Bại');
+                    $('#myModal').modal('show');
+                }else if($.trim(res)=='ok'){
+                    $('.modal-title').text('ĐH HD-'+idOrder+'đã được chuyển qua trạng thái hủy!');
+                    $('#myModal').modal('show');
+                    
+                }
+            },
+            error:function(err){
+                console.log(err);
             }
         })
     })
-
-    $('#btn-go').click(function(){
-        var idBill = $(this).attr('data-id')
-        $.ajax({
-            url:"editbill.php",
-            type:'POST',
-            data:{
-                id_bill:idBill,
-                status:2
-            },
-            success:function(res){
-                // console.log(res)
-                if($.trim(res)=='ok'){
-                    $('#bill-'+idBill).remove()
-                    $('#myModal1').modal('hide')
-                    alert('Cập nhật thành công')
-                }
-                else 
-                    alert('Vui lòng thử lại')
-            },
-            error:function(){
-                console.log('errr')
-            }
-        })
-    })
-        });
-
-        //custom select box
-
-        $(function () {
-            $('select.styled').customSelect();
-        });
-
+    $('#btnCancel').click(function () { 
+        location.reload();
+        
+     });
+})
     </script>
 
 </body>

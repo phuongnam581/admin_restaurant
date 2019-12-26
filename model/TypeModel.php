@@ -1,8 +1,8 @@
 <?php
-    include_once('C:\xampp\htdocs\admin_nhahang\model\BaseModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\BaseModel.php');
     class TypeModel extends BaseModel{
-        function getFoodsByType($id){
-            $sql = "SELECT * FROM foods WHERE id_type=$id";
+        function getProductsByType($id){
+            $sql = "SELECT * FROM products WHERE id_categories='$id' AND deleted='0'";
            return  $this->loadMoreRows($sql);
         }
     }

@@ -1,27 +1,21 @@
 <?php
-    include_once('C:\xampp\htdocs\admin_nhahang\model\BaseModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\BaseModel.php');
     class AddFoodModel extends BaseModel{
-        function insertFood($id_type,$id_url,$name,$summary,$detail,$price,$promotion_price,$promotion,$image,$unit,$today){
-            $sql="INSERT INTO foods (id,id_type,id_url,name,summary,detail,price,promotion_price,promotion,image,unit,today)
-            VALUES ('','$id_type','$id_url','$name','$summary','$detail','$price','$promotion_price','$promotion','$image','$unit','$today')";
+        function insertProduct($id_type,$product_code,$name,$detail,$value,$img,$id_distributor,$quanlity_exist,$date){
+            $sql="INSERT INTO products (id_categories,name,detail,value,image,new,created_at,quanlity_exist,id_distributor,product_code)
+            VALUES ('$id_type','$name','$detail','$value','$img','1','$date','$quanlity_exist','$id_distributor','$product_code')";
             return $this->executeQuery($sql);
         }
 
-        function insertUrl($url){
-            $sql="INSERT INTO page_url (id,url)
-            VALUES ('','$url')";
-             return $this->executeQuery($sql);
-        }
-
-        function selectIdUrl($url){
-            $sql="SELECT id FROM page_url WHERE url='$url'";
-            return $this->loadOneRow($sql);
-        }
-
-        function insertType($name,$description){
-            $sql= "INSERT INTO food_type (id,name,description)
-                   VALUES ('','$name','$description')";
+        function insertType($name){
+            $sql= "INSERT INTO categories (id,name)
+                   VALUES ('','$name')";
                    return $this->executeQuery($sql);
+        }
+
+        function getDistributor(){
+            $sql="SELECT * FROM distributor";
+            return $this->loadMoreRows($sql);
         }
     }
    

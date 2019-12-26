@@ -1,6 +1,6 @@
 <?php
-    include_once('C:\xampp\htdocs\admin_nhahang\model\MenuModel.php');
-    include_once('C:\xampp\htdocs\admin_nhahang\controller\Controller.php');
+    include_once('C:\xampp\htdocs\admin_balo\model\MenuModel.php');
+    include_once('C:\xampp\htdocs\admin_balo\controller\Controller.php');
     class MenuController extends Controller{
         function getType(){
             $model = new MenuModel;
